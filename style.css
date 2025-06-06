@@ -87,11 +87,14 @@ canvas {
 }
 
 .color-selector {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 45px);
     gap: 15px;
-    flex-wrap: wrap;
     justify-content: center;
-    max-width: 400px;
+    max-width: 500px;
+    width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
 }
 
 .color-swatch {
@@ -102,6 +105,10 @@ canvas {
     border: 3px solid white;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.color-swatch[data-color="#ffffff"] {
+    border-color: #ddd;
 }
 
 .color-swatch.selected {
