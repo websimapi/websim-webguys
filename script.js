@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { TWEEN } from '@tweenjs/tween.js';
 
 let scene, camera, renderer, webguy, pedestal, controls;
-let bodyMaterial;
+let bodyMaterial, leftEye, rightEye;
 const clock = new THREE.Clock();
 const room = new WebsimSocket();
 
@@ -23,6 +24,7 @@ async function main() {
     init();
     initUI();
     animate();
+    scheduleNextBlink();
 
     // Set initial color from presence or default
     const myPresence = room.presence[room.clientId] || {};
@@ -193,9 +195,9 @@ function createWebguy() {
     // Eyes
     const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.2 });
     const eyeGeo = new THREE.SphereGeometry(0.1, 16, 16);
-    const leftEye = new THREE.Mesh(eyeGeo, eyeMaterial);
+    leftEye = new THREE.Mesh(eyeGeo, eyeMaterial);
     leftEye.position.set(-0.2, 0.0, 0.05);
-    const rightEye = new THREE.Mesh(eyeGeo, eyeMaterial);
+    rightEye = new THREE.Mesh(eyeGeo, eyeMaterial);
     rightEye.position.set(0.2, 0.0, 0.05);
     face.add(leftEye, rightEye);
 
@@ -228,7 +230,6 @@ function createWebguy() {
     webguy.position.y = 0.5; // Place on top of the pedestal
 }
 
-
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -251,6 +252,52 @@ function animate() {
         }
     }
     
+    TWEEN.update();
     controls.update();
     renderer.render(scene, camera);
+}
+
+function blink() {
+    // Don't blink if another blink is already in progress.
+    if (!leftEye || !rightEye || leftEye.scale.y < 1) {
+        return;
+    }
+
+    const scale = { y: 1 };
+    const closeTween = new TWEEN.Tween(scale)
+        .to({ y: 0.01 }, 75)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .onUpdate(() => {
+            leftEye.scale.y = scale.y;
+            rightEye.scale.y = scale.y;
+        });
+
+    const openTween = new TWEEN.Tween(scale)
+        .to({ y: 1 }, 75)
+        .easing(TWEEN.Easing.Quadratic.In)
+        .onUpdate(() => {
+            leftEye.scale.y = scale.y;
+            rightEye.scale.y = scale.y;
+        });
+
+    closeTween.chain(openTween);
+    closeTween.start();
+}
+
+function scheduleNextBlink() {
+    // Random interval between 3 and 12 seconds
+    const interval = Math.random() * (12000 - 3000) + 3000;
+
+    setTimeout(() => {
+        blink();
+
+        // 1/8 chance of a double blink
+        if (Math.random() < 1/8) {
+            // A second blink shortly after. 200ms feels more natural for a "double blink" than 2 seconds.
+            setTimeout(blink, 200);
+        }
+
+        // Schedule the next blink
+        scheduleNextBlink();
+    }, interval);
 }
