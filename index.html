@@ -18,28 +18,58 @@
     <div id="scene-container"></div>
 
     <div class="ui-overlay">
-        <div class="top-content">
-            <header class="top-bar">
-                <div class="player-info">
-                    <div class="avatar"></div>
-                    <span>Player123</span>
+        <div id="main-menu">
+            <div class="top-content">
+                <header class="top-bar">
+                    <div class="player-info">
+                        <div class="avatar"></div>
+                        <span>Player123</span>
+                    </div>
+                    <div class="currency">
+                        <span>💎 150</span>
+                        <span>🪙 5000</span>
+                    </div>
+                </header>
+        
+                <div class="game-title">
+                    <h1>WEBGUYS</h1>
                 </div>
-                <div class="currency">
-                    <span>💎 150</span>
-                    <span>🪙 5000</span>
-                </div>
-            </header>
-    
-            <div class="game-title">
-                <h1>WEBGUYS</h1>
             </div>
+    
+            <footer class="bottom-bar">
+                <button id="customize-btn" class="menu-button">Customize</button>
+                <button id="level-editor-btn" class="menu-button icon-button" aria-label="Level Editor">
+                    <img src="/level-editor-icon.png" alt="">
+                </button>
+                <button class="play-button">PLAY!</button>
+                <button class="menu-button">Shop</button>
+            </footer>
         </div>
 
-        <footer class="bottom-bar">
-            <button class="menu-button">Customize</button>
-            <button class="play-button">PLAY!</button>
-            <button class="menu-button">Shop</button>
-        </footer>
+        <div id="customize-screen" class="hidden">
+            <div class="customize-panel">
+                <h2>Customize</h2>
+                <div class="color-selector">
+                    <div class="color-swatch" data-color="#ff69b4" style="background-color: #ff69b4;"></div>
+                    <div class="color-swatch" data-color="#e74c3c" style="background-color: #e74c3c;"></div>
+                    <div class="color-swatch" data-color="#ff7043" style="background-color: #ff7043;"></div>
+                    <div class="color-swatch" data-color="#ffca28" style="background-color: #ffca28;"></div>
+                    <div class="color-swatch" data-color="#2ecc71" style="background-color: #2ecc71;"></div>
+                    <div class="color-swatch" data-color="#66bb6a" style="background-color: #66bb6a;"></div>
+                    <div class="color-swatch" data-color="#1abc9c" style="background-color: #1abc9c;"></div>
+                    <div class="color-swatch" data-color="#3498db" style="background-color: #3498db;"></div>
+                    <div class="color-swatch" data-color="#42a5f5" style="background-color: #42a5f5;"></div>
+                    <div class="color-swatch" data-color="#9b59b6" style="background-color: #9b59b6;"></div>
+                    <div class="color-swatch" data-color="#ab47bc" style="background-color: #ab47bc;"></div>
+                    <div class="color-swatch" data-color="#8d6e63" style="background-color: #8d6e63;"></div>
+                    <div class="color-swatch" data-color="#ffffff" style="background-color: #ffffff;"></div>
+                    <div class="color-swatch" data-color="#ecf0f1" style="background-color: #ecf0f1;"></div>
+                    <div class="color-swatch" data-color="#34495e" style="background-color: #34495e;"></div>
+                    <div class="color-swatch" data-color="#000000" style="background-color: #000000;"></div>
+                </div>
+                <button id="back-btn" class="menu-button">Back</button>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="script.js"></script>
