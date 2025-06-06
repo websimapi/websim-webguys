@@ -70,6 +70,44 @@
                 <button id="back-btn" class="menu-button">Back</button>
             </div>
         </div>
+
+        <div id="level-editor-screen" class="hidden">
+            <div class="level-editor-top-bar">
+                <button id="exit-editor-btn" class="menu-button">Exit</button>
+                <span class="editor-title">Level Editor</span>
+                <button id="save-level-btn" class="menu-button">Save</button>
+            </div>
+        
+            <div class="level-editor-object-palette">
+                <div class="palette-item" data-object-type="box">
+                    <img src="/platform-box-icon.png" alt="Box">
+                </div>
+                <div class="palette-item" data-object-type="cylinder">
+                    <img src="/platform-cylinder-icon.png" alt="Cylinder">
+                </div>
+                <div class="palette-item" data-object-type="ramp">
+                    <img src="/platform-ramp-icon.png" alt="Ramp">
+                </div>
+            </div>
+        
+            <div class="level-editor-tool-bar">
+                <button class="tool-button selected" data-tool="select">
+                    <img src="/tool-select-icon.png" alt="Select">
+                </button>
+                <button class="tool-button" data-tool="move">
+                    <img src="/tool-move-icon.png" alt="Move">
+                </button>
+                <button class="tool-button" data-tool="rotate">
+                    <img src="/tool-rotate-icon.png" alt="Rotate">
+                </button>
+                <button class="tool-button" data-tool="scale">
+                    <img src="/tool-scale-icon.png" alt="Scale">
+                </button>
+                <button class="tool-button" data-tool="delete">
+                    <img src="/tool-delete-icon.png" alt="Delete">
+                </button>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="script.js"></script>

@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let scene, camera, renderer, webguy, pedestal, controls;
-let bodyMaterial;
+let bodyMaterial, gridHelper;
+let isEditorMode = false;
 const clock = new THREE.Clock();
 const room = new WebsimSocket();
 
@@ -166,6 +167,93 @@ function initUI() {
             room.updatePresence({ color: newColor });
         });
     });
+
+    // Level Editor UI Logic
+    const levelEditorBtn = document.getElementById('level-editor-btn');
+    const exitEditorBtn = document.getElementById('exit-editor-btn');
+    
+    levelEditorBtn.addEventListener('click', enterLevelEditor);
+    exitEditorBtn.addEventListener('click', exitLevelEditor);
+    
+    const toolButtons = document.querySelectorAll('.tool-button');
+    toolButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            toolButtons.forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+            const tool = button.dataset.tool;
+            console.log("Selected tool:", tool);
+            // TODO: Add logic for tool change
+        });
+    });
+
+    const paletteItems = document.querySelectorAll('.palette-item');
+    paletteItems.forEach(item => {
+        item.addEventListener('click', () => {
+            paletteItems.forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+            const objectType = item.dataset.objectType;
+            console.log("Selected object:", objectType);
+            // TODO: Add logic for object selection
+        });
+    });
+}
+
+function enterLevelEditor() {
+    isEditorMode = true;
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('customize-screen').classList.add('hidden');
+    document.getElementById('level-editor-screen').classList.remove('hidden');
+
+    // Change scene appearance for editor
+    scene.background.set(0x444444);
+    scene.fog = null;
+
+    // Hide main menu 3D objects
+    if (webguy) webguy.visible = false;
+    if (pedestal) pedestal.visible = false;
+    
+    // Show editor specific 3D objects
+    if (!gridHelper) {
+        gridHelper = new THREE.GridHelper(50, 50, 0xffffff, 0xaaaaaa);
+        gridHelper.material.opacity = 0.2;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+    }
+    gridHelper.visible = true;
+
+    // Adjust camera and controls for editing
+    controls.enablePan = true;
+    controls.minDistance = 2;
+    controls.maxDistance = 50;
+    controls.maxPolarAngle = Math.PI / 2.05;
+    controls.target.set(0, 0, 0);
+}
+
+function exitLevelEditor() {
+    isEditorMode = false;
+    document.getElementById('level-editor-screen').classList.add('hidden');
+    document.getElementById('main-menu').classList.remove('hidden');
+
+    // Revert scene appearance
+    scene.background.set(0x87ceeb);
+    scene.fog = new THREE.Fog(0x87ceeb, 10, 25);
+
+    // Show main menu 3D objects
+    if (webguy) webguy.visible = true;
+    if (pedestal) pedestal.visible = true;
+
+    // Hide editor specific 3D objects
+    if (gridHelper) gridHelper.visible = false;
+
+    // Revert camera and controls
+    controls.enablePan = false;
+    controls.minDistance = 4;
+    controls.maxDistance = 12;
+    controls.maxPolarAngle = Math.PI / 2.2;
+    controls.target.set(0, 1.6, 0);
+
+    // Restart clock for animations
+    clock.start();
 }
 
 function createPedestal() {
@@ -288,24 +376,26 @@ function onWindowResize() {
 function animate() {
     requestAnimationFrame(animate);
 
-    const elapsedTime = clock.getElapsedTime();
+    if (!isEditorMode) {
+        const elapsedTime = clock.getElapsedTime();
 
-    if (webguy) {
-        // Bobbing the whole character group
-        webguy.position.y = 0.5 + Math.sin(elapsedTime * 3) * 0.07;
-        
-        // Rotating the body inside the group
-        const body = webguy.children[0];
-        if(body) {
-           body.rotation.y = Math.sin(elapsedTime * 0.7) * 0.3;
-        }
+        if (webguy) {
+            // Bobbing the whole character group
+            webguy.position.y = 0.5 + Math.sin(elapsedTime * 3) * 0.07;
+            
+            // Rotating the body inside the group
+            const body = webguy.children[0];
+            if(body) {
+            body.rotation.y = Math.sin(elapsedTime * 0.7) * 0.3;
+            }
 
-        // Handle blinking
-        if (!blinkState.isBlinking && elapsedTime >= blinkState.nextBlinkTime) {
-            startBlink(elapsedTime);
-        }
-        if (blinkState.isBlinking) {
-            updateBlinkAnimation(elapsedTime);
+            // Handle blinking
+            if (!blinkState.isBlinking && elapsedTime >= blinkState.nextBlinkTime) {
+                startBlink(elapsedTime);
+            }
+            if (blinkState.isBlinking) {
+                updateBlinkAnimation(elapsedTime);
+            }
         }
     }
     
