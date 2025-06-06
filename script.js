@@ -4,10 +4,58 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 let scene, camera, renderer, webguy, pedestal, controls;
 let bodyMaterial;
 const clock = new THREE.Clock();
+const room = new WebsimSocket();
 
-init();
-initUI();
-animate();
+async function main() {
+    await room.initialize();
+
+    // Update player UI with connected user's info
+    const myInfo = room.peers[room.clientId];
+    if (myInfo) {
+        const playerAvatarElement = document.querySelector('.player-info .avatar');
+        const playerNameElement = document.querySelector('.player-info span');
+        playerNameElement.textContent = myInfo.username;
+        if (playerAvatarElement) {
+            playerAvatarElement.style.backgroundImage = `url(${myInfo.avatarUrl})`;
+        }
+    }
+
+    init();
+    initUI();
+    animate();
+
+    // Set initial color from presence or default
+    const myPresence = room.presence[room.clientId] || {};
+    const initialColor = myPresence.color || '#ff69b4';
+
+    if (bodyMaterial) {
+        bodyMaterial.color.set(initialColor);
+    }
+    document.querySelectorAll('.color-swatch.selected').forEach(s => s.classList.remove('selected'));
+    const currentSwatch = document.querySelector(`.color-swatch[data-color="${initialColor}"]`);
+    if (currentSwatch) {
+        currentSwatch.classList.add('selected');
+    }
+
+    // Handle incoming presence updates (e.g. color changes) to sync state
+    room.subscribePresence(presence => {
+        const myNewPresence = presence[room.clientId];
+        if (myNewPresence && myNewPresence.color) {
+            // This will mainly handle updates from other devices for the same user
+            if (bodyMaterial && bodyMaterial.color.getHexString() !== myNewPresence.color.substring(1)) {
+                bodyMaterial.color.set(myNewPresence.color);
+            
+                document.querySelectorAll('.color-swatch.selected').forEach(s => s.classList.remove('selected'));
+                const newSwatch = document.querySelector(`.color-swatch[data-color="${myNewPresence.color}"]`);
+                if (newSwatch) {
+                    newSwatch.classList.add('selected');
+                }
+            }
+        }
+    });
+}
+
+main();
 
 function init() {
     // Scene setup
@@ -95,7 +143,7 @@ function initUI() {
 
     colorSwatches.forEach(swatch => {
         swatch.addEventListener('click', () => {
-            // Update selected state visual
+            // Optimistic UI update for immediate feedback
             colorSwatches.forEach(s => s.classList.remove('selected'));
             swatch.classList.add('selected');
 
@@ -104,6 +152,8 @@ function initUI() {
             if (bodyMaterial) {
                 bodyMaterial.color.set(newColor);
             }
+            // Sync color with other players
+            room.updatePresence({ color: newColor });
         });
     });
 }
