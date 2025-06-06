@@ -2,9 +2,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let scene, camera, renderer, webguy, pedestal, controls;
+let bodyMaterial;
 const clock = new THREE.Clock();
 
 init();
+initUI();
 animate();
 
 function init() {
@@ -74,6 +76,38 @@ function init() {
     window.addEventListener('resize', onWindowResize, false);
 }
 
+function initUI() {
+    const customizeBtn = document.getElementById('customize-btn');
+    const backBtn = document.getElementById('back-btn');
+    const mainMenu = document.getElementById('main-menu');
+    const customizeScreen = document.getElementById('customize-screen');
+    const colorSwatches = document.querySelectorAll('.color-swatch');
+
+    customizeBtn.addEventListener('click', () => {
+        mainMenu.classList.add('hidden');
+        customizeScreen.classList.remove('hidden');
+    });
+
+    backBtn.addEventListener('click', () => {
+        customizeScreen.classList.add('hidden');
+        mainMenu.classList.remove('hidden');
+    });
+
+    colorSwatches.forEach(swatch => {
+        swatch.addEventListener('click', () => {
+            // Update selected state visual
+            colorSwatches.forEach(s => s.classList.remove('selected'));
+            swatch.classList.add('selected');
+
+            // Change 3D model color
+            const newColor = swatch.dataset.color;
+            if (bodyMaterial) {
+                bodyMaterial.color.set(newColor);
+            }
+        });
+    });
+}
+
 function createPedestal() {
     const pedestalMaterial = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.5, metalness: 0.2 });
     const pedestalGeo = new THREE.CylinderGeometry(1.5, 1.7, 0.5, 32);
@@ -88,7 +122,7 @@ function createWebguy() {
     webguy = new THREE.Group();
     scene.add(webguy);
 
-    const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xff69b4, roughness: 0.7, metalness: 0.1 });
+    bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xff69b4, roughness: 0.7, metalness: 0.1 });
 
     // Body (using a capsule shape)
     const bodyRadius = 0.7;
@@ -170,4 +204,3 @@ function animate() {
     controls.update();
     renderer.render(scene, camera);
 }
-
